@@ -21,11 +21,10 @@ public class JumpShoot extends Application
 	private int sceneWidth = 600;
 	private int sceneHeight = 600;
 	private boolean lost = false;
-	
+		
 	//references to GUI
 	private Canvas canvas;
 	private GraphicsContext ctx;
-	//private int fps = 50;
 	
 	@Override
 	public void init()
@@ -46,6 +45,14 @@ public class JumpShoot extends Application
 		primary.setScene(s);
 		primary.show();
 		
+		//set up event listening
+		s.setOnKeyPressed( e ->
+		{
+			System.out.println(e);
+			players.get(0).setVelocity(20,-500);
+		});
+		
+		
 		//start animation
 		GameAnimation game_animation = new GameAnimation();
 		game_animation.start();
@@ -55,30 +62,17 @@ public class JumpShoot extends Application
 	public void stop()
 	{}
 	
-	public void startGame()
-	{
-		
-	}
-	
-	public void endGame()
-	{
-		
-	}
-	
 	public class GameAnimation extends AnimationTimer
 	{
-		//thing to animate
-		private Player player;
 		
 		//physics variables
 		private double t_i = -1.0; //inital time in s; handle will define it if it sees that this is -1
 		
-		private double ay; // px/s^2
+		private double ay = 750; // px/s^2
 		
 		public GameAnimation() //2nd and 3rd args are initial velocities, px/s
 		{
 			super();
-			ay = 400; // px/s^2
 		}
 		
 		@Override
@@ -91,14 +85,14 @@ public class JumpShoot extends Application
 			
 			//get time in seconds
 			double t = (double) now / 10e8 - t_i;
-			
+						
 			//clear canvas
 			ctx.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
 			
 			//loop through players and update their positions and draw them
 			for(Player p : players)
 			{
-				p.updatePosition(t);
+				p.updatePosition(t, ay);
 				p.draw(ctx);
 			}
 		}
