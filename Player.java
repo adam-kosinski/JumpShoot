@@ -84,30 +84,29 @@ public class Player
 		}
 		
 		//detect wall collision
+		boolean foundXCollision = false;
+		boolean foundYCollision = false;
 		//loop through walls
 		for(Wall w : walls)
 		{
 			//x
-			if(x > 400) //placeholder
+			/*if(x > 400) //placeholder
 			{
 				x = 400;
 				x_collision = 1;
 				setXVelocity(0);
-			}
+			}*/
 			
 			//y
 			//test collision below
 			if( (x+width > w.getX() && x < w.getX()+w.getWidth()) && (prev_y+height <= w.getY() && y+height >= w.getY()) ) //if on top of wall && if at height for collision
 			{
+				foundYCollision = true;
+				
 				y = w.getY() - height;
 				y_collision = 1;
 				setYVelocity(0);
 			}
-			else
-			{
-				y_collision = 0; //this will break for multiple walls
-			}
-			
 			
 			if(y < 100) //placeholder
 			{
@@ -116,6 +115,8 @@ public class Player
 				setYVelocity(0);
 			}
 		}
+		if(!foundXCollision) {x_collision = 0;}
+		if(!foundYCollision) {y_collision = 0;}
 	}
 	
 	public void setXVelocity(double vx)//time is the current time in seconds, from when the main animation timer started
@@ -128,11 +129,11 @@ public class Player
 	
 	public void setYVelocity(double vy)//time is the current time in seconds, from when the main animation timer started
 	{
+		if(y_collision != 1){return;} //must have something below to jump off of
+		
 		yi = y;
 		this.vy = vy;
 		
 		ti_y = time;
 	}
-	
-	
 }

@@ -24,11 +24,16 @@ public class JumpShoot extends Application
 	private Canvas canvas;
 	private GraphicsContext ctx;
 	
+	//misc.
+	private boolean jump_key_pressed = false; //used so we only handle one keydown for jumping
+	
 	@Override
 	public void init()
 	{
 		players.add(new Player(100,200,50,50,Color.RED));
-		walls.add(new Wall(20,400,300,30,Color.BROWN));
+		walls.add(new Wall(20,400,200,30,Color.BROWN));
+		walls.add(new Wall(300,500,200,30,Color.BROWN));
+		walls.add(new Wall(0,570,600,30,Color.BROWN));
 	}
 	
 	@Override
@@ -47,7 +52,6 @@ public class JumpShoot extends Application
 		//set up event listening
 		s.setOnKeyPressed( e ->
 		{
-			System.out.println(e);
 			KeyCode code = e.getCode();
 			if(code == KeyCode.W)
 			{
@@ -65,12 +69,7 @@ public class JumpShoot extends Application
 		
 		s.setOnKeyReleased( e ->
 		{
-			System.out.println(e);
 			KeyCode code = e.getCode();
-			if(code == KeyCode.W)
-			{
-				players.get(0).setYVelocity(-500);
-			}
 			if(code == KeyCode.A || code == KeyCode.D)
 			{
 				players.get(0).setXVelocity(0);
@@ -114,17 +113,19 @@ public class JumpShoot extends Application
 			//clear canvas
 			ctx.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
 			
+			//loop through walls and draw them
+			for(Wall w : walls)
+			{
+				w.draw(ctx);
+			}
+			
 			//loop through players and update their positions and draw them
 			for(Player p : players)
 			{
 				p.updatePosition(t, ay, walls);
 				p.draw(ctx);
 			}
-			//loop through walls and draw them
-			for(Wall w : walls)
-			{
-				w.draw(ctx);
-			}
+			
 		}
 	}
 }
