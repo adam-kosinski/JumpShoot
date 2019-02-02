@@ -78,15 +78,13 @@ public class Player
 		{
 			x = xi + vx*t_x;
 		}
-		if(y_collision != 1)
+		if(y_collision == 0)
 		{
 			y = yi + vy*t_y + 0.5*ay*t_y*t_y;
 		}
 		
 		//detect wall collision
 		//loop through walls
-		boolean foundXCollision = false;
-		boolean foundYCollision = false;
 		for(Wall w : walls)
 		{
 			//x
@@ -99,16 +97,15 @@ public class Player
 			
 			//y
 			//test collision below
-			if(x+width > w.getX() && x < w.getX()+w.getWidth()) //if on top of wall
+			if( (x+width > w.getX() && x < w.getX()+w.getWidth()) && (prev_y+height <= w.getY() && y+height >= w.getY()) ) //if on top of wall && if at height for collision
 			{
-				if(y_collision == 1 || prev_y+height < w.getY() && y+height > w.getY()) //if at proper height
-				{
-					foundYCollision = true;
-					
-					y = w.getY() - height;
-					y_collision = 1;
-					setYVelocity(0);
-				}
+				y = w.getY() - height;
+				y_collision = 1;
+				setYVelocity(0);
+			}
+			else
+			{
+				y_collision = 0; //this will break for multiple walls
 			}
 			
 			
