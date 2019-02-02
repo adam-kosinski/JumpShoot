@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -11,7 +13,8 @@ public class Player
 	private double vy;
 	
 	private double time; //time of most recent updatePosition call
-	private double ti; //time of most recent velocity reset
+	private double ti_x; //time of most recent x velocity reset
+	private double ti_y; //time of most recent y velocity reset
 	
 	private int x_collision; // -1 means wall to left, 0 means no collision, 1 means wall to right
 	private int y_collision; // -1 means wall above, 0 means no collision, 1 means wall below
@@ -30,7 +33,8 @@ public class Player
 		this.vy = 0;
 		
 		this.time = 0;
-		this.ti = 0;
+		this.ti_x = 0;
+		this.ti_y = 0;
 		
 		this.x_collision = 0;
 		this.y_collision = 0;
@@ -47,12 +51,13 @@ public class Player
 	}
 	
 	//function to update player's position
-	public void updatePosition(double time, double ay) //time is the current time in seconds, from when the main animation timer started
+	public void updatePosition(double time, double ay, ArrayList<Wall> walls) //time is the current time in seconds, from when the main animation timer started
 	{
 		this.time = time;
 		
 		//define t to be time since most recent velocity reset
-		double t = time - ti;
+		double t_x = time - ti_x;
+		double t_y = time - ti_y;
 		
 		//if velocity is in opposite direction to collision, no more collision
 		if(x_collision == 1 && vx < 0 || x_collision == -1 && vx > 0)
@@ -64,49 +69,72 @@ public class Player
 			y_collision = 0;
 		}
 		
+		//store previous position
+		double prev_x = x;
+		double prev_y = y;
+		
 		//move player if no collisions preventing it
 		if(x_collision == 0)
 		{
-			x = xi + vx*t;
+			x = xi + vx*t_x;
 		}
 		if(y_collision != 1)
 		{
-			y = yi + vy*t + 0.5*ay*t*t;
+			y = yi + vy*t_y + 0.5*ay*t_y*t_y;
 		}
 		
-		//detect platform collision
-		//x
-		if(x > 400) //placeholder
+		//detect wall collision
+		//loop through walls
+		boolean foundXCollision = false;
+		boolean foundYCollision = false;
+		for(Wall w : walls)
 		{
-			x = 400;
-			x_collision = 1;
-			setVelocity(0,vy);
-		}
-		
-		//y
-		if(y > 400) //placeholder
-		{
-			y = 400;
-			y_collision = 1;
-			setVelocity(vx,0);
-		}
-		if(y < 100) //placeholder
-		{
-			y = 100;
-			y_collision = -1;
-			setVelocity(vx,0);
+			//x
+			if(x > 400) //placeholder
+			{
+				x = 400;
+				x_collision = 1;
+				setXVelocity(0);
+			}
+			
+			//y
+			//test collision below
+			if(x+width > w.getX() && x < w.getX()+w.getWidth()) //if on top of wall
+			{
+				if(y_collision == 1 || prev_y+height < w.getY() && y+height > w.getY()) //if at proper height
+				{
+					foundYCollision = true;
+					
+					y = w.getY() - height;
+					y_collision = 1;
+					setYVelocity(0);
+				}
+			}
+			
+			
+			if(y < 100) //placeholder
+			{
+				y = 100;
+				y_collision = -1;
+				setYVelocity(0);
+			}
 		}
 	}
 	
-	public void setVelocity(double vx, double vy)//time is the current time in seconds, from when the main animation timer started
+	public void setXVelocity(double vx)//time is the current time in seconds, from when the main animation timer started
 	{
-		xi = x;
-		yi = y;
-		
+		xi = x;		
 		this.vx = vx;
+		
+		ti_x = time;
+	}
+	
+	public void setYVelocity(double vy)//time is the current time in seconds, from when the main animation timer started
+	{
+		yi = y;
 		this.vy = vy;
 		
-		ti = time;
+		ti_y = time;
 	}
 	
 	
