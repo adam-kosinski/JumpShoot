@@ -1,13 +1,15 @@
 import java.util.ArrayList;
 
+import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.input.KeyCode;
 
 public class Player
 {
-	private double x;
+	private double x; //of top-left corner
 	private double xi; //initial x position (reset when velocity is reset)
-	private double y;
+	private double y; //of top-left corner
 	private double yi; //initial y position (reset when velocity is reset)
 	private double vx;
 	private double vy;
@@ -23,7 +25,13 @@ public class Player
 	private double height;
 	private Color color;
 	
-	public Player(double x,double y,double width,double height,Color color)
+	private KeyCode jumpKey;
+	private KeyCode leftKey;
+	private KeyCode rightKey;
+	private KeyCode downKey;
+	private KeyCode ballKey;
+	
+	public Player(double x,double y,double width,double height, Color color)
 	{
 		this.x = x;
 		this.xi = x;
@@ -42,6 +50,47 @@ public class Player
 		this.width = width;
 		this.height = height;
 		this.color = color;
+	}
+	
+	public void handleKeyPress(KeyCode key)
+	{
+		//we assume that bindKeys() has been called already
+		
+		if(key == jumpKey && y_collision == 1) //can only jump if on a platform
+		{
+			setYVelocity(-500);
+		}
+		else if(key == leftKey)
+		{
+			setXVelocity(-150);
+		}
+		else if(key == rightKey)
+		{
+			setXVelocity(150);
+		}
+		else if(key == downKey)
+		{
+		}
+		else if(key == ballKey)
+		{
+		}
+	}
+	
+	public void handleKeyRelease(KeyCode key)
+	{
+		if(key == leftKey || key == rightKey)
+		{
+			setXVelocity(0);
+		}
+	}
+	
+	public void bindKeys(KeyCode jumpKey, KeyCode leftKey, KeyCode rightKey, KeyCode downKey, KeyCode ballKey)
+	{
+		this.jumpKey = jumpKey;
+		this.leftKey = leftKey;
+		this.rightKey = rightKey;
+		this.downKey = downKey;
+		this.ballKey = ballKey;
 	}
 	
 	public void draw(GraphicsContext ctx)
@@ -78,7 +127,7 @@ public class Player
 		{
 			x = xi + vx*t_x;
 		}
-		if(y_collision == 0)
+		if(y_collision != 1)
 		{
 			y = yi + vy*t_y + 0.5*ay*t_y*t_y;
 		}
@@ -89,17 +138,9 @@ public class Player
 		//loop through walls
 		for(Wall w : walls)
 		{
-			//x
-			/*if(x > 400) //placeholder
-			{
-				x = 400;
-				x_collision = 1;
-				setXVelocity(0);
-			}*/
-			
 			//y
 			//test collision below
-			if( (x+width > w.getX() && x < w.getX()+w.getWidth()) && (prev_y+height <= w.getY() && y+height >= w.getY()) ) //if on top of wall && if at height for collision
+			if( (x+width > w.getX() && x < w.getX()+w.getWidth()) && (prev_y+height <= w.getY() && y+height >= w.getY()) ) //if in right x-range and collide vertically
 			{
 				foundYCollision = true;
 				
@@ -107,20 +148,55 @@ public class Player
 				y_collision = 1;
 				setYVelocity(0);
 			}
-			
-			if(y < 100) //placeholder
+			//all other collision tests are dependent on if this is a top-collision-only wall
+			if(w.isTopCollisionOnly())
 			{
-				y = 100;
-				y_collision = -1;
-				setYVelocity(0);
-			}
-		}
+				//test collision above
+				if( (x+width > w.getX() && x < w.getX()+w.getWidth()) && (prev_y >= w.getY()+w.getHeight() && y <= w.getY()+w.getHeight()) ) //if in right x-range and collide vertically
+				{
+					foundYCollision = true;
+					
+					y = w.getY()+w.getHeight();
+					y_collision = -1;
+					setYVelocity(0);
+				}
+				
+				//x
+				//test collision to right
+				if( (y+height > w.getY() && y < w.getY()+w.getHeight()) && (prev_x+width <= w.getX() && x+width >= w.getX()) ) //if in right y-range and collide horizontally
+				{
+					foundXCollision = true;
+					
+					x = w.getX() - width;
+					x_collision = 1;
+					
+					//do set velocity stuff without changing the stored velocity
+					xi = x;
+					ti_x = time;
+				}
+				//test collision to left
+				if( (y+height > w.getY() && y < w.getY()+w.getHeight()) && (prev_x >= w.getX()+w.getWidth() && x <= w.getX()+w.getWidth()) ) //if in right y-range and collide horizontally
+				{
+					foundXCollision = true;
+					
+					x = w.getX()+w.getWidth();
+					x_collision = -1;
+					
+					//do set velocity stuff without changing the stored velocity
+					xi = x;
+					ti_x = time;
+				}
+			}			
+		} //finish looping through walls
 		if(!foundXCollision) {x_collision = 0;}
 		if(!foundYCollision) {y_collision = 0;}
 	}
 	
 	public void setXVelocity(double vx)//time is the current time in seconds, from when the main animation timer started
 	{
+		if(x_collision == 1 && vx > 0){return;}
+		if(x_collision == -1 && vx < 0){return;}
+		
 		xi = x;		
 		this.vx = vx;
 		
@@ -129,7 +205,8 @@ public class Player
 	
 	public void setYVelocity(double vy)//time is the current time in seconds, from when the main animation timer started
 	{
-		if(y_collision != 1){return;} //must have something below to jump off of
+		if(y_collision == 1 && vy > 0){return;}
+		if(y_collision == -1 && vy < 0){return;}
 		
 		yi = y;
 		this.vy = vy;

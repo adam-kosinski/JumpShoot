@@ -19,21 +19,15 @@ public class JumpShoot extends Application
 	//variables to hold objects - players, bullets, surfaces
 	private ArrayList<Player> players = new ArrayList<Player>();
 	private ArrayList<Wall> walls = new ArrayList<Wall>();
+	private ArrayList<Ball> balls = new ArrayList<Ball>();
 	
 	//references to GUI
 	private Canvas canvas;
 	private GraphicsContext ctx;
 	
-	//misc.
-	private boolean jump_key_pressed = false; //used so we only handle one keydown for jumping
-	
 	@Override
 	public void init()
 	{
-		players.add(new Player(100,200,50,50,Color.RED));
-		walls.add(new Wall(20,400,200,30,Color.BROWN));
-		walls.add(new Wall(300,500,200,30,Color.BROWN));
-		walls.add(new Wall(0,570,600,30,Color.BROWN));
 	}
 	
 	@Override
@@ -49,30 +43,33 @@ public class JumpShoot extends Application
 		primary.setScene(s);
 		primary.show();
 		
-		//set up event listening
+		//create objects
+		players.add(new Player(100,200,50,50,Color.RED));
+		players.get(0).bindKeys(KeyCode.E, KeyCode.S, KeyCode.F, KeyCode.D, KeyCode.Q);
+		players.add(new Player(400,200,50,50,Color.GREEN));
+		players.get(1).bindKeys(KeyCode.U, KeyCode.H, KeyCode.K, KeyCode.J, KeyCode.Y);
+		
+		walls.add(new Wall(20,400,200,30,Color.BROWN, true));
+		walls.add(new Wall(300,500,200,30,Color.BROWN, false));
+		walls.add(new Wall(0,570,600,30,Color.BROWN, false));
+		
+		balls.add(new Ball(300, 100, 50, Color.BLUE));
+		
+		//handle event listening
 		s.setOnKeyPressed( e ->
 		{
-			KeyCode code = e.getCode();
-			if(code == KeyCode.W)
+			KeyCode key = e.getCode();
+			for(Player p : players)
 			{
-				players.get(0).setYVelocity(-500);
-			}
-			if(code == KeyCode.A)
-			{
-				players.get(0).setXVelocity(-100);
-			}
-			if(code == KeyCode.D)
-			{
-				players.get(0).setXVelocity(100);
+				p.handleKeyPress(key);
 			}
 		});
-		
 		s.setOnKeyReleased( e ->
 		{
-			KeyCode code = e.getCode();
-			if(code == KeyCode.A || code == KeyCode.D)
+			KeyCode key = e.getCode();
+			for(Player p : players)
 			{
-				players.get(0).setXVelocity(0);
+				p.handleKeyRelease(key);
 			}
 		});
 		
@@ -124,6 +121,13 @@ public class JumpShoot extends Application
 			{
 				p.updatePosition(t, ay, walls);
 				p.draw(ctx);
+			}
+			
+			//loop through balls and draw them
+			for(Ball b : balls)
+			{
+				b.updatePosition();
+				b.draw(ctx);
 			}
 			
 		}

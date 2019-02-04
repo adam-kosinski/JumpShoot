@@ -9,13 +9,16 @@ public class Wall
 	private double height;
 	private Color color;
 	
-	public Wall(double x, double y, double width, double height, Color color)
+	private boolean top_collision_only; //if true, only stuff falling from above will interact with the wall
+	
+	public Wall(double x, double y, double width, double height, Color color, boolean top_collision_only)
 	{
-		this.x = x;
+		this.x = x; //(x,y) of top left corner
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		this.color = color;
+		this.top_collision_only = top_collision_only;
 	}
 	
 	public void draw(GraphicsContext ctx)
@@ -39,5 +42,9 @@ public class Wall
 	public double getHeight()
 	{
 		return height;
+	}
+	public boolean isTopCollisionOnly()
+	{
+		return top_collision_only;
 	}
 }
