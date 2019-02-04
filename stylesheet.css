@@ -29,6 +29,10 @@ p
 {
     text-align:center;
 }
+
+.center {
+	text-align: center;
+}
 footer
 {
     width:100%;
@@ -36,11 +40,19 @@ footer
     margin-right:auto;
     text-align:center;
 }
-ol
-{
-    text-align:center;   
-}
+
 .pie
 {
     color:black;
+}
+
+img
+{
+	display: block;
+	margin: auto;
+}
+
+.code_container {
+	display: inline-block;
+	margin: 20px;
 }
