@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
@@ -31,6 +32,10 @@ public class Player
 	private KeyCode downKey;
 	private KeyCode ballKey;
 	
+	private Optional<Ball> myBall;
+	private ArrayList<Wall> walls; //will be equal to the main array of these
+	private ArrayList<Ball> balls;
+	
 	public Player(double x,double y,double width,double height, Color color)
 	{
 		this.x = x;
@@ -50,6 +55,8 @@ public class Player
 		this.width = width;
 		this.height = height;
 		this.color = color;
+		
+		this.myBall = Optional.empty();
 	}
 	
 	public void handleKeyPress(KeyCode key)
@@ -73,6 +80,13 @@ public class Player
 		}
 		else if(key == ballKey)
 		{
+			//loop through available balls
+			for(Ball b : balls)
+			{
+				
+			}
+			//if the center of this player is within the radius of the ball, we can pick it up
+			//double dist = Math.hypot
 		}
 	}
 	
@@ -93,6 +107,12 @@ public class Player
 		this.ballKey = ballKey;
 	}
 	
+	public void giveObjects(ArrayList<Wall> walls, ArrayList<Ball> balls)
+	{
+		this.walls = walls;
+		this.balls = balls;
+	}
+	
 	public void draw(GraphicsContext ctx)
 	{
 		ctx.setFill(color);
@@ -100,7 +120,7 @@ public class Player
 	}
 	
 	//function to update player's position
-	public void updatePosition(double time, double ay, ArrayList<Wall> walls) //time is the current time in seconds, from when the main animation timer started
+	public void updatePosition(double time, double ay) //time is the current time in seconds, from when the main animation timer started
 	{
 		this.time = time;
 		
@@ -212,5 +232,33 @@ public class Player
 		this.vy = vy;
 		
 		ti_y = time;
+	}
+	
+	public void grabBall(Ball b)
+	{
+		myBall = Optional.of(b);
+		b.pickup(this);
+	}
+	
+	public void shootBall()
+	{
+		if(myBall.isEmpty()){return;}
+	}
+	
+	public double getX()
+	{
+		return x;
+	}
+	public double getY()
+	{
+		return y;
+	}
+	public double getWidth()
+	{
+		return width;
+	}
+	public double getHeight()
+	{
+		return height;
 	}
 }

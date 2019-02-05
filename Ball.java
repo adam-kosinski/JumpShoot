@@ -1,3 +1,5 @@
+import java.util.Optional;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -9,6 +11,8 @@ public class Ball
 	private Color color;
 	
 	private boolean dangerous = false;
+	private boolean held = false;
+	private Optional<Player> holder;
 	
 	public Ball(double x, double y, double r, Color color)
 	{
@@ -26,11 +30,39 @@ public class Ball
 	
 	public void updatePosition()
 	{
-		
+		//if this ball is held, keep pace with the player holding it
+		if(held)
+		{
+			x = holder.get().getX() + (holder.get().getWidth() / 2);
+			y = holder.get().getY();
+		}
 	}
 	
+	public void pickup(Player p)
+	{
+		held = true;
+		holder = Optional.of(p);
+	}
+	
+	
+	public double getX()
+	{
+		return x;
+	}
+	public double getY()
+	{
+		return y;
+	}
+	public double getRadius()
+	{
+		return r;
+	}
 	public boolean isDangerous()
 	{
 		return dangerous;
+	}
+	public boolean isHeld()
+	{
+		return held;
 	}
 }
