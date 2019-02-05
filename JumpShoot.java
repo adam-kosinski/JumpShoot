@@ -55,7 +55,7 @@ public class JumpShoot extends Application
 		walls.add(new Wall(300,500,200,30,Color.BROWN, false));
 		walls.add(new Wall(0,570,600,30,Color.BROWN, false));
 		
-		balls.add(new Ball(300, 100, 50, Color.BLUE));
+		balls.add(new Ball(300, 500, 50, Color.BLUE));
 		
 		//handle event listening
 		s.setOnKeyPressed( e ->

@@ -83,10 +83,17 @@ public class Player
 			//loop through available balls
 			for(Ball b : balls)
 			{
+				if(b.isDangerous() || b.isHeld()){continue;} //can't pick up dangerous or held balls
 				
+				//if the center of this player is within the radius of the ball, we can pick it up
+				double dist = Math.hypot(x+(width/2) - b.getX(), y+(height/2) - b.getY());
+				if(dist < b.getRadius())
+				{
+					myBall = Optional.of(b);
+					b.pickup(this);
+					break; //stop searching for balls
+				}
 			}
-			//if the center of this player is within the radius of the ball, we can pick it up
-			//double dist = Math.hypot
 		}
 	}
 	
@@ -232,12 +239,6 @@ public class Player
 		this.vy = vy;
 		
 		ti_y = time;
-	}
-	
-	public void grabBall(Ball b)
-	{
-		myBall = Optional.of(b);
-		b.pickup(this);
 	}
 	
 	public void shootBall()
