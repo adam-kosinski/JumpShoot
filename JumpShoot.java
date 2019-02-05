@@ -55,7 +55,16 @@ public class JumpShoot extends Application
 		walls.add(new Wall(300,500,200,30,Color.BROWN, false));
 		walls.add(new Wall(0,570,600,30,Color.BROWN, false));
 		
-		balls.add(new Ball(300, 500, 50, Color.BLUE));
+		balls.add(new Ball(50, 100, 20, Color.BLUE));
+		
+		for(Player p : players)
+		{
+			p.giveObjects(walls,balls);
+		}
+		for(Ball b : balls)
+		{
+			b.giveObjects(walls,balls);
+		}
 		
 		//handle event listening
 		s.setOnKeyPressed( e ->
@@ -118,18 +127,18 @@ public class JumpShoot extends Application
 				w.draw(ctx);
 			}
 			
+			//loop through balls and draw them - NOTE: doing ball position before players will cause a lag in position when carrying balls... which looks cool!!!
+			for(Ball b : balls)
+			{
+				b.updatePosition(t, ay);
+				b.draw(ctx);
+			}
+			
 			//loop through players and update their positions and draw them
 			for(Player p : players)
 			{
 				p.updatePosition(t, ay);
 				p.draw(ctx);
-			}
-			
-			//loop through balls and draw them
-			for(Ball b : balls)
-			{
-				b.updatePosition();
-				b.draw(ctx);
 			}
 			
 		}

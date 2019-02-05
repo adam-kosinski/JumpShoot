@@ -33,6 +33,9 @@ public class Player
 	private KeyCode ballKey;
 	
 	private Optional<Ball> myBall;
+	private double shootAngle; //in radians
+	private double shootVelocity; //in px/s
+	
 	private ArrayList<Wall> walls; //will be equal to the main array of these
 	private ArrayList<Ball> balls;
 	
@@ -57,6 +60,23 @@ public class Player
 		this.color = color;
 		
 		this.myBall = Optional.empty();
+		this.shootAngle = -Math.PI/4;
+		this.shootVelocity = 500;
+	}
+	
+	public void bindKeys(KeyCode jumpKey, KeyCode leftKey, KeyCode rightKey, KeyCode downKey, KeyCode ballKey)
+	{
+		this.jumpKey = jumpKey;
+		this.leftKey = leftKey;
+		this.rightKey = rightKey;
+		this.downKey = downKey;
+		this.ballKey = ballKey;
+	}
+	
+	public void giveObjects(ArrayList<Wall> walls, ArrayList<Ball> balls)
+	{
+		this.walls = walls;
+		this.balls = balls;
 	}
 	
 	public void handleKeyPress(KeyCode key)
@@ -80,19 +100,26 @@ public class Player
 		}
 		else if(key == ballKey)
 		{
-			//loop through available balls
-			for(Ball b : balls)
+			if(myBall.isEmpty()) //try to grab a ball if we don't have one
 			{
-				if(b.isDangerous() || b.isHeld()){continue;} //can't pick up dangerous or held balls
-				
-				//if the center of this player is within the radius of the ball, we can pick it up
-				double dist = Math.hypot(x+(width/2) - b.getX(), y+(height/2) - b.getY());
-				if(dist < b.getRadius())
+				//loop through available balls
+				for(Ball b : balls)
 				{
-					myBall = Optional.of(b);
-					b.pickup(this);
-					break; //stop searching for balls
+					if(b.isDangerous() || b.isHeld()){continue;} //can't pick up dangerous or held balls
+					
+					//if the center of this player is within the radius of the ball, we can pick it up
+					double dist = Math.hypot(x+(width/2) - b.getX(), y+(height/2) - b.getY());
+					if(dist < b.getRadius())
+					{
+						myBall = Optional.of(b);
+						b.pickup(this);
+						break; //stop searching for balls
+					}
 				}
+			}
+			else //we have a ball, shoot it
+			{
+				shootBall();
 			}
 		}
 	}
@@ -103,21 +130,6 @@ public class Player
 		{
 			setXVelocity(0);
 		}
-	}
-	
-	public void bindKeys(KeyCode jumpKey, KeyCode leftKey, KeyCode rightKey, KeyCode downKey, KeyCode ballKey)
-	{
-		this.jumpKey = jumpKey;
-		this.leftKey = leftKey;
-		this.rightKey = rightKey;
-		this.downKey = downKey;
-		this.ballKey = ballKey;
-	}
-	
-	public void giveObjects(ArrayList<Wall> walls, ArrayList<Ball> balls)
-	{
-		this.walls = walls;
-		this.balls = balls;
 	}
 	
 	public void draw(GraphicsContext ctx)
@@ -244,6 +256,13 @@ public class Player
 	public void shootBall()
 	{
 		if(myBall.isEmpty()){return;}
+		
+		Ball b = myBall.get();
+		b.release();
+		b.setXVelocity(shootVelocity * Math.cos(shootAngle));
+		b.setYVelocity(shootVelocity * Math.sin(shootAngle));
+		
+		myBall = Optional.empty();
 	}
 	
 	public double getX()
