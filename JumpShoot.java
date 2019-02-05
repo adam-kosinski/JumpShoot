@@ -49,7 +49,7 @@ public class JumpShoot extends Application
 		players.get(0).giveObjects(walls,balls);
 		players.add(new Player(400,200,50,50,Color.GREEN));
 		players.get(1).bindKeys(KeyCode.U, KeyCode.H, KeyCode.K, KeyCode.J, KeyCode.Y);
-		players.get(0).giveObjects(walls,balls);
+		players.get(1).giveObjects(walls,balls);
 		
 		walls.add(new Wall(20,400,200,30,Color.BROWN, true));
 		walls.add(new Wall(300,500,200,30,Color.BROWN, false));
