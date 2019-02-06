@@ -28,7 +28,7 @@ public class Ball
 	private int y_collision; // -1 means wall above, 0 means no collision, 1 means wall below
 	
 	private boolean thrown = false; //balls are dangerous after a timeout after released, until a y-collision below happens
-	private boolean safe_timeout; //timeout after a ball is released before it becomes dangerous
+	private double safe_timeout; //timeout after a ball is released before it becomes dangerous
 	private Optional<Player> holder;
 	
 	private ArrayList<Wall> walls;
@@ -231,7 +231,7 @@ public class Ball
 	public void release()
 	{
 		holder = Optional.empty();
-		dangerous = true;
+		thrown = true;
 		t_release = time;
 	}
 	
@@ -253,6 +253,7 @@ public class Ball
 		{
 			return true;
 		}
+		return false;
 	}
 	public boolean isHeld()
 	{
