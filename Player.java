@@ -15,7 +15,10 @@ public class Player
 	private double vx;
 	private double vy;
 	private double ay;
+	
 	private double vy_boost; //extra vy to gain from pressing the down key
+	private double jump_speed;
+	private double horiz_speed;
 	
 	private double time; //time of most recent updatePosition call
 	private double ti_x; //time of most recent x velocity reset
@@ -32,13 +35,16 @@ public class Player
 	private KeyCode leftKey;
 	private KeyCode rightKey;
 	private KeyCode downKey;
+	private KeyCode rotateLeftKey; //for launch angle changing
 	private KeyCode ballKey;
+	private KeyCode rotateRightKey;
 	private KeyCode prevKey;
 	
 	private String direction; //"left" or "right"; direction the player is facing
 	
 	private Optional<Ball> myBall;
-	private double nominalShootAngle; //angle to shoot at from horizontal, regardless of left/right. This is positive when shooting up as it appears on the canvas.
+	private double[] shootAngleArray; //stores possible shoot angles, from 0 to pi/2.  These are positive when shooting up as it appears on the canvas.
+	private int shootAngleIndex; //index in shoot angle array to reference
 	private double shootAngle; //in radians, actual angle of launch, in math coords, not canvas coords
 	private double shootVelocity; //in px/s
 	
@@ -54,7 +60,10 @@ public class Player
 		this.vx = 0;
 		this.vy = 0;
 		this.ay = ay;
-		this.vy_boost = 500;
+		
+		this.vy_boost = 250;
+		this.jump_speed = 250;
+		this.horiz_speed = 125;
 		
 		this.time = 0;
 		this.ti_x = 0;
@@ -67,21 +76,25 @@ public class Player
 		this.height = height;
 		this.color = color;
 		
-		this.direction = "right";
+		this.direction = "right"; //make sure this is consistent with the initialized shootAngle
 		
 		this.myBall = Optional.empty();
-		this.nominalShootAngle = Math.PI/4;
-		this.shootAngle = -nominalShootAngle;
-		this.shootVelocity = 300;
+		
+		this.shootAngleArray = new double[]{0.0,0.25*Math.PI,0.75*Math.PI,Math.PI};
+		this.shootAngleIndex = 2;
+		this.shootAngle = -shootAngleArray[shootAngleIndex];
+		this.shootVelocity = 250;
 	}
 	
-	public void bindKeys(KeyCode jumpKey, KeyCode leftKey, KeyCode rightKey, KeyCode downKey, KeyCode ballKey)
+	public void bindKeys(KeyCode jumpKey, KeyCode leftKey, KeyCode downKey, KeyCode rightKey, KeyCode rotateLeftKey, KeyCode ballKey, KeyCode rotateRightKey)
 	{
 		this.jumpKey = jumpKey;
 		this.leftKey = leftKey;
-		this.rightKey = rightKey;
 		this.downKey = downKey;
+		this.rightKey = rightKey;
+		this.rotateLeftKey = rotateLeftKey;
 		this.ballKey = ballKey;
+		this.rotateRightKey = rotateRightKey;
 		this.prevKey = KeyCode.UNDEFINED;
 	}
 	
@@ -97,15 +110,15 @@ public class Player
 				
 		if(key == jumpKey && y_collision == 1) //can only jump if on a platform
 		{
-			setYVelocity(-500);
+			setYVelocity(-jump_speed);
 		}
 		else if(key == leftKey)
 		{
-			setXVelocity(-150);
+			setXVelocity(-horiz_speed);
 		}
 		else if(key == rightKey)
 		{
-			setXVelocity(150);
+			setXVelocity(horiz_speed);
 		}
 		else if(key == downKey)
 		{
@@ -138,6 +151,24 @@ public class Player
 				shootBall();
 			}
 		}
+		else if(key == rotateLeftKey)
+		{
+			if(shootAngleIndex < shootAngleArray.length - 1)
+			{
+				shootAngleIndex++;
+				shootAngle = -shootAngleArray[shootAngleIndex];
+			}
+			System.out.println(shootAngleIndex);
+		}
+		else if(key == rotateRightKey)
+		{
+			if(shootAngleIndex > 0)
+			{
+				shootAngleIndex--;
+				shootAngle = -shootAngleArray[shootAngleIndex];
+			}
+			System.out.println(shootAngleIndex);
+		}
 		
 		prevKey = key;
 	}
@@ -152,6 +183,15 @@ public class Player
 	
 	public void draw(GraphicsContext ctx)
 	{
+		//draw trajectory direction
+		if(myBall.isPresent())
+		{
+			ctx.setStroke(Color.GRAY);
+			ctx.setLineDashes(width/5);
+			ctx.strokeLine(x+width/2, y, x+width/2 + width*Math.cos(shootAngle), y + height*Math.sin(shootAngle));
+		}
+		
+		//draw player
 		ctx.setFill(color);
 		ctx.fillRect(x,y,width,height);
 	}
@@ -259,14 +299,8 @@ public class Player
 		
 		ti_x = time;
 		
-		if(vx < 0){
-			shootAngle = -(Math.PI - nominalShootAngle);
-			direction = "left";
-		}
-		if(vx > 0){
-			shootAngle = -nominalShootAngle;
-			direction = "right";
-		}
+		if(vx < 0){direction = "left";}
+		if(vx > 0){direction = "right";}
 	}
 	
 	public void setYVelocity(double vy)//time is the current time in seconds, from when the main animation timer started

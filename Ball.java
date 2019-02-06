@@ -22,11 +22,13 @@ public class Ball
 	private double ti_x; //time of most recent x velocity reset
 	private double ti_y; //time of most recent y velocity reset
 	private double t_y_collision; //time when y-collision started, used for friction calculations
+	private double t_release; //time when released, used for calculations if the ball is dangerous
 	
 	private int x_collision; // -1 means wall to left, 0 means no collision, 1 means wall to right
 	private int y_collision; // -1 means wall above, 0 means no collision, 1 means wall below
 	
-	private boolean dangerous = false;
+	private boolean thrown = false; //balls are dangerous after a timeout after released, until a y-collision below happens
+	private boolean safe_timeout; //timeout after a ball is released before it becomes dangerous
 	private Optional<Player> holder;
 	
 	private ArrayList<Wall> walls;
@@ -50,6 +52,9 @@ public class Ball
 		this.ti_x = 0;
 		this.ti_y = 0;
 		this.t_y_collision = 0;
+		this.t_release = 0;
+		
+		this.safe_timeout = 0.2;
 		
 		this.x_collision = 0;
 		this.y_collision = 0;
@@ -65,6 +70,9 @@ public class Ball
 	public void draw(GraphicsContext ctx)
 	{
 		ctx.setFill(color);
+		if(isDangerous()){
+			ctx.setFill(Color.BLACK);
+		}
 		ctx.fillOval(x-r, y-r, r*2, r*2);
 	}
 	
@@ -130,6 +138,7 @@ public class Ball
 				if(y_collision == 0) //if the previous movement didn't have a y collision, this is the first y-collision
 				{
 					t_y_collision = time;
+					thrown = false;
 				}
 				
 				y = w.getY() - r;
@@ -222,6 +231,8 @@ public class Ball
 	public void release()
 	{
 		holder = Optional.empty();
+		dangerous = true;
+		t_release = time;
 	}
 	
 	public double getX()
@@ -238,7 +249,10 @@ public class Ball
 	}
 	public boolean isDangerous()
 	{
-		return dangerous;
+		if(time - t_release > safe_timeout && thrown == true)
+		{
+			return true;
+		}
 	}
 	public boolean isHeld()
 	{

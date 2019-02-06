@@ -26,7 +26,7 @@ public class JumpShoot extends Application
 	private GraphicsContext ctx;
 	
 	//misc
-	private double ay = 750; //gravitational acceleration, px/s^2
+	private double ay = 375; //gravitational acceleration, px/s^2
 	
 	@Override
 	public void init()
@@ -47,18 +47,15 @@ public class JumpShoot extends Application
 		primary.show();
 		
 		//create objects
-		players.add(new Player(100,200,50,50,Color.RED,ay));
-		players.get(0).bindKeys(KeyCode.E, KeyCode.S, KeyCode.F, KeyCode.D, KeyCode.Q);
+		players.add(new Player(100,200,25,25,Color.RED,ay));
+		players.get(0).bindKeys(KeyCode.R, KeyCode.D, KeyCode.F, KeyCode.G, KeyCode.DIGIT1, KeyCode.DIGIT2, KeyCode.DIGIT3);
 		players.get(0).giveObjects(walls,balls);
-		players.add(new Player(400,200,50,50,Color.GREEN,ay));
-		players.get(1).bindKeys(KeyCode.UP, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.DOWN, KeyCode.M);
-		players.get(1).giveObjects(walls,balls);
 		
 		walls.add(new Wall(20,400,200,30,Color.BROWN, true));
 		walls.add(new Wall(300,500,200,30,Color.BROWN, false));
 		walls.add(new Wall(0,570,600,30,Color.BROWN, false));
 		
-		balls.add(new Ball(50, 100, 20, Color.BLUE,ay));
+		balls.add(new Ball(50, 100, 10, Color.BLUE,ay));
 		
 		for(Player p : players)
 		{
