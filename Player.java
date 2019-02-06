@@ -80,10 +80,10 @@ public class Player
 		
 		this.myBall = Optional.empty();
 		
-		this.shootAngleArray = new double[]{0.0,0.25*Math.PI,0.75*Math.PI,Math.PI};
+		this.shootAngleArray = new double[]{0.05*Math.PI,0.25*Math.PI,0.75*Math.PI,0.95*Math.PI};
 		this.shootAngleIndex = 2;
 		this.shootAngle = -shootAngleArray[shootAngleIndex];
-		this.shootVelocity = 250;
+		this.shootVelocity = 300;
 	}
 	
 	public void bindKeys(KeyCode jumpKey, KeyCode leftKey, KeyCode downKey, KeyCode rightKey, KeyCode rotateLeftKey, KeyCode ballKey, KeyCode rotateRightKey)
@@ -158,7 +158,6 @@ public class Player
 				shootAngleIndex++;
 				shootAngle = -shootAngleArray[shootAngleIndex];
 			}
-			System.out.println(shootAngleIndex);
 		}
 		else if(key == rotateRightKey)
 		{
@@ -167,7 +166,6 @@ public class Player
 				shootAngleIndex--;
 				shootAngle = -shootAngleArray[shootAngleIndex];
 			}
-			System.out.println(shootAngleIndex);
 		}
 		
 		prevKey = key;
@@ -246,7 +244,7 @@ public class Player
 				setYVelocity(0);
 			}
 			//all other collision tests are dependent on if this is a top-collision-only wall
-			if(w.isTopCollisionOnly())
+			if(!w.isTopCollisionOnly())
 			{
 				//test collision above
 				if( (x+width > w.getX() && x < w.getX()+w.getWidth()) && (prev_y >= w.getY()+w.getHeight() && y <= w.getY()+w.getHeight()) ) //if in right x-range and collide vertically

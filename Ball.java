@@ -27,7 +27,7 @@ public class Ball
 	private int x_collision; // -1 means wall to left, 0 means no collision, 1 means wall to right
 	private int y_collision; // -1 means wall above, 0 means no collision, 1 means wall below
 	
-	private boolean thrown = false; //balls are dangerous after a timeout after released, until a y-collision below happens
+	private boolean thrown = false; //balls are dangerous after a timeout after released, until stops moving
 	private double safe_timeout; //timeout after a ball is released before it becomes dangerous
 	private Optional<Player> holder;
 	
@@ -46,7 +46,7 @@ public class Ball
 		this.vx = 0;
 		this.vy = 0;
 		this.ay = ay;
-		this.x_friction_scalar = 0.8;
+		this.x_friction_scalar = 0.6;
 		
 		this.time = 0;
 		this.ti_x = 0;
@@ -54,7 +54,7 @@ public class Ball
 		this.t_y_collision = 0;
 		this.t_release = 0;
 		
-		this.safe_timeout = 0.2;
+		this.safe_timeout = 0.1;
 		
 		this.x_collision = 0;
 		this.y_collision = 0;
@@ -138,7 +138,6 @@ public class Ball
 				if(y_collision == 0) //if the previous movement didn't have a y collision, this is the first y-collision
 				{
 					t_y_collision = time;
-					thrown = false;
 				}
 				
 				y = w.getY() - r;
@@ -146,7 +145,7 @@ public class Ball
 				setYVelocity(0);
 			}
 			//all other collision tests are dependent on if this is a top-collision-only wall
-			if(w.isTopCollisionOnly())
+			if(!w.isTopCollisionOnly())
 			{
 				//test collision above
 				if( (x+r > w.getX() && x-r < w.getX()+w.getWidth()) && (prev_y-r >= w.getY()+w.getHeight() && y-r <= w.getY()+w.getHeight()) ) //if in right x-range and collide vertically
@@ -199,6 +198,11 @@ public class Ball
 			double new_vx = vx * Math.pow(x_friction_scalar, time-t_y_collision); //apply friction
 			new_vx = Math.abs(new_vx) < 1 ? 0 : new_vx; //round to zero if really small x velocity
 			setXVelocity(new_vx);
+			
+			if(new_vx == 0)
+			{
+				thrown = false; //if a y-collision, and the horizontal velocity is zero, the ball stopped moving
+			}
 		}
 	}
 	
