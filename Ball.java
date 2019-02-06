@@ -15,10 +15,13 @@ public class Ball
 	private double yi; //initial y position (reset when velocity is reset)
 	private double vx;
 	private double vy;
+	private double ay;
+	private double x_friction_scalar; //must be < 1. During collisions, multiply vx by this^t (t in seconds) to simulate friction
 	
 	private double time; //time of most recent updatePosition call
 	private double ti_x; //time of most recent x velocity reset
 	private double ti_y; //time of most recent y velocity reset
+	private double t_y_collision; //time when y-collision started, used for friction calculations
 	
 	private int x_collision; // -1 means wall to left, 0 means no collision, 1 means wall to right
 	private int y_collision; // -1 means wall above, 0 means no collision, 1 means wall below
@@ -29,7 +32,7 @@ public class Ball
 	private ArrayList<Wall> walls;
 	private ArrayList<Ball> balls;
 	
-	public Ball(double x, double y, double r, Color color)
+	public Ball(double x, double y, double r, Color color, double ay)
 	{
 		this.x = x;
 		this.y = y;
@@ -40,10 +43,13 @@ public class Ball
 		this.yi = y;
 		this.vx = 0;
 		this.vy = 0;
+		this.ay = ay;
+		this.x_friction_scalar = 0.8;
 		
 		this.time = 0;
 		this.ti_x = 0;
 		this.ti_y = 0;
+		this.t_y_collision = 0;
 		
 		this.x_collision = 0;
 		this.y_collision = 0;
@@ -62,7 +68,7 @@ public class Ball
 		ctx.fillOval(x-r, y-r, r*2, r*2);
 	}
 	
-	public void updatePosition(double time, double ay)
+	public void updatePosition(double time)
 	{
 		this.time = time;
 		
@@ -77,11 +83,8 @@ public class Ball
 		}
 		
 		//if not held, do normal physics
-				
-		//define t to be time since most recent velocity reset
-		double t_x = time - ti_x;
-		double t_y = time - ti_y;
 		
+		// --- PRE-MOTION ACTIONS (may change initial position, velocity, or time variables) --------------------------------
 		//if velocity is in opposite direction to collision, no more collision
 		if(x_collision == 1 && vx < 0 || x_collision == -1 && vx > 0)
 		{
@@ -92,6 +95,12 @@ public class Ball
 			y_collision = 0;
 		}
 		
+		// --- MOTION ACTIONS (initial position, velocity, and time variables are fixed up until position calculation is done) --------------------------------
+		
+		//define t to be time since most recent velocity reset
+		double t_x = time - ti_x;
+		double t_y = time - ti_y;
+		
 		//store previous position
 		double prev_x = x;
 		double prev_y = y;
@@ -101,6 +110,7 @@ public class Ball
 		{
 			x = xi + vx*t_x;
 		}
+		
 		if(y_collision != 1)
 		{
 			y = yi + vy*t_y + 0.5*ay*t_y*t_y;
@@ -117,6 +127,10 @@ public class Ball
 			if( (x+r > w.getX() && x-r < w.getX()+w.getWidth()) && (prev_y+r <= w.getY() && y+r >= w.getY()) ) //if in right x-range and collide vertically
 			{
 				foundYCollision = true;
+				if(y_collision == 0) //if the previous movement didn't have a y collision, this is the first y-collision
+				{
+					t_y_collision = time;
+				}
 				
 				y = w.getY() - r;
 				y_collision = 1;
@@ -129,7 +143,10 @@ public class Ball
 				if( (x+r > w.getX() && x-r < w.getX()+w.getWidth()) && (prev_y-r >= w.getY()+w.getHeight() && y-r <= w.getY()+w.getHeight()) ) //if in right x-range and collide vertically
 				{
 					foundYCollision = true;
-					
+					if(y_collision == 0) //if the previous movement didn't have a y collision, this is the first y-collision
+					{
+						t_y_collision = time;
+					}
 					y = w.getY()+w.getHeight() + r;
 					y_collision = -1;
 					setYVelocity(0);
@@ -163,7 +180,17 @@ public class Ball
 			}			
 		} //finish looping through walls
 		if(!foundXCollision) {x_collision = 0;}
+		else {setXVelocity(0);} //stop horizontal movement if we crashed into something
+		
 		if(!foundYCollision) {y_collision = 0;}
+		
+		//apply friction for next update call if there's a y-collision
+		if(y_collision != 0) //then we have x-friction
+		{
+			double new_vx = vx * Math.pow(x_friction_scalar, time-t_y_collision); //apply friction
+			new_vx = Math.abs(new_vx) < 1 ? 0 : new_vx; //round to zero if really small x velocity
+			setXVelocity(new_vx);
+		}
 	}
 	
 	public void setXVelocity(double vx)//time is the current time in seconds, from when the main animation timer started

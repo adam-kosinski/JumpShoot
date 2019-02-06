@@ -25,6 +25,9 @@ public class JumpShoot extends Application
 	private Canvas canvas;
 	private GraphicsContext ctx;
 	
+	//misc
+	private double ay = 750; //gravitational acceleration, px/s^2
+	
 	@Override
 	public void init()
 	{
@@ -44,18 +47,18 @@ public class JumpShoot extends Application
 		primary.show();
 		
 		//create objects
-		players.add(new Player(100,200,50,50,Color.RED));
+		players.add(new Player(100,200,50,50,Color.RED,ay));
 		players.get(0).bindKeys(KeyCode.E, KeyCode.S, KeyCode.F, KeyCode.D, KeyCode.Q);
 		players.get(0).giveObjects(walls,balls);
-		players.add(new Player(400,200,50,50,Color.GREEN));
-		players.get(1).bindKeys(KeyCode.U, KeyCode.H, KeyCode.K, KeyCode.J, KeyCode.Y);
+		players.add(new Player(400,200,50,50,Color.GREEN,ay));
+		players.get(1).bindKeys(KeyCode.UP, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.DOWN, KeyCode.M);
 		players.get(1).giveObjects(walls,balls);
 		
 		walls.add(new Wall(20,400,200,30,Color.BROWN, true));
 		walls.add(new Wall(300,500,200,30,Color.BROWN, false));
 		walls.add(new Wall(0,570,600,30,Color.BROWN, false));
 		
-		balls.add(new Ball(50, 100, 20, Color.BLUE));
+		balls.add(new Ball(50, 100, 20, Color.BLUE,ay));
 		
 		for(Player p : players)
 		{
@@ -99,8 +102,6 @@ public class JumpShoot extends Application
 		//physics variables
 		private double t_i = -1.0; //inital time in s; handle will define it if it sees that this is -1
 		
-		private double ay = 750; // px/s^2
-		
 		public GameAnimation()
 		{
 			super();
@@ -130,15 +131,28 @@ public class JumpShoot extends Application
 			//loop through balls and draw them - NOTE: doing ball position before players will cause a lag in position when carrying balls... which looks cool!!!
 			for(Ball b : balls)
 			{
-				b.updatePosition(t, ay);
-				b.draw(ctx);
+				b.updatePosition(t);
+				//only draw held balls now, b/c they should appear behind the players. Non-held balls will be drawn later, in front of the players
+				if(b.isHeld())
+				{
+					b.draw(ctx);
+				}
 			}
 			
 			//loop through players and update their positions and draw them
 			for(Player p : players)
 			{
-				p.updatePosition(t, ay);
+				p.updatePosition(t);
 				p.draw(ctx);
+			}
+			
+			//draw non-held balls
+			for(Ball b : balls)
+			{
+				if(!b.isHeld())
+				{
+					b.draw(ctx);
+				}
 			}
 			
 		}

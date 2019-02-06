@@ -14,6 +14,8 @@ public class Player
 	private double yi; //initial y position (reset when velocity is reset)
 	private double vx;
 	private double vy;
+	private double ay;
+	private double vy_boost; //extra vy to gain from pressing the down key
 	
 	private double time; //time of most recent updatePosition call
 	private double ti_x; //time of most recent x velocity reset
@@ -31,15 +33,19 @@ public class Player
 	private KeyCode rightKey;
 	private KeyCode downKey;
 	private KeyCode ballKey;
+	private KeyCode prevKey;
+	
+	private String direction; //"left" or "right"; direction the player is facing
 	
 	private Optional<Ball> myBall;
-	private double shootAngle; //in radians
+	private double nominalShootAngle; //angle to shoot at from horizontal, regardless of left/right. This is positive when shooting up as it appears on the canvas.
+	private double shootAngle; //in radians, actual angle of launch, in math coords, not canvas coords
 	private double shootVelocity; //in px/s
 	
 	private ArrayList<Wall> walls; //will be equal to the main array of these
 	private ArrayList<Ball> balls;
 	
-	public Player(double x,double y,double width,double height, Color color)
+	public Player(double x,double y,double width,double height, Color color, double ay)
 	{
 		this.x = x;
 		this.xi = x;
@@ -47,6 +53,8 @@ public class Player
 		this.yi = y;
 		this.vx = 0;
 		this.vy = 0;
+		this.ay = ay;
+		this.vy_boost = 500;
 		
 		this.time = 0;
 		this.ti_x = 0;
@@ -59,9 +67,12 @@ public class Player
 		this.height = height;
 		this.color = color;
 		
+		this.direction = "right";
+		
 		this.myBall = Optional.empty();
-		this.shootAngle = -Math.PI/4;
-		this.shootVelocity = 500;
+		this.nominalShootAngle = Math.PI/4;
+		this.shootAngle = -nominalShootAngle;
+		this.shootVelocity = 300;
 	}
 	
 	public void bindKeys(KeyCode jumpKey, KeyCode leftKey, KeyCode rightKey, KeyCode downKey, KeyCode ballKey)
@@ -71,6 +82,7 @@ public class Player
 		this.rightKey = rightKey;
 		this.downKey = downKey;
 		this.ballKey = ballKey;
+		this.prevKey = KeyCode.UNDEFINED;
 	}
 	
 	public void giveObjects(ArrayList<Wall> walls, ArrayList<Ball> balls)
@@ -82,7 +94,7 @@ public class Player
 	public void handleKeyPress(KeyCode key)
 	{
 		//we assume that bindKeys() has been called already
-		
+				
 		if(key == jumpKey && y_collision == 1) //can only jump if on a platform
 		{
 			setYVelocity(-500);
@@ -97,6 +109,10 @@ public class Player
 		}
 		else if(key == downKey)
 		{
+			if(prevKey != downKey) //check previous key so we don't get massive change in velocity due to rapid-fire keypress events from holding down the key
+			{
+				setYVelocity(vy + ay*(time-ti_y) + vy_boost);
+			}
 		}
 		else if(key == ballKey)
 		{
@@ -122,6 +138,8 @@ public class Player
 				shootBall();
 			}
 		}
+		
+		prevKey = key;
 	}
 	
 	public void handleKeyRelease(KeyCode key)
@@ -139,13 +157,9 @@ public class Player
 	}
 	
 	//function to update player's position
-	public void updatePosition(double time, double ay) //time is the current time in seconds, from when the main animation timer started
+	public void updatePosition(double time) //time is the current time in seconds, from when the main animation timer started
 	{
 		this.time = time;
-		
-		//define t to be time since most recent velocity reset
-		double t_x = time - ti_x;
-		double t_y = time - ti_y;
 		
 		//if velocity is in opposite direction to collision, no more collision
 		if(x_collision == 1 && vx < 0 || x_collision == -1 && vx > 0)
@@ -156,6 +170,10 @@ public class Player
 		{
 			y_collision = 0;
 		}
+		
+		//define t to be time since most recent velocity reset
+		double t_x = time - ti_x;
+		double t_y = time - ti_y;
 		
 		//store previous position
 		double prev_x = x;
@@ -240,6 +258,15 @@ public class Player
 		this.vx = vx;
 		
 		ti_x = time;
+		
+		if(vx < 0){
+			shootAngle = -(Math.PI - nominalShootAngle);
+			direction = "left";
+		}
+		if(vx > 0){
+			shootAngle = -nominalShootAngle;
+			direction = "right";
+		}
 	}
 	
 	public void setYVelocity(double vy)//time is the current time in seconds, from when the main animation timer started
