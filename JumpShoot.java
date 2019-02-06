@@ -47,7 +47,7 @@ public class JumpShoot extends Application
 		primary.show();
 		
 		//create objects
-		players.add(new Player(100,200,25,25,Color.RED,ay));
+		players.add(new Player(100,200,25,45,Color.RED,ay));
 		players.get(0).bindKeys(KeyCode.R, KeyCode.D, KeyCode.F, KeyCode.G, KeyCode.DIGIT1, KeyCode.DIGIT2, KeyCode.DIGIT3);
 		players.get(0).giveObjects(walls,balls);
 		
@@ -132,18 +132,13 @@ public class JumpShoot extends Application
 				w.draw(ctx);
 			}
 			
-			//loop through balls and draw them - NOTE: doing ball position before players will cause a lag in position when carrying balls... which looks cool!!!
+			//loop through balls and update them - NOTE: doing ball position before players will cause a lag in position when carrying balls... which looks cool!!!
 			for(Ball b : balls)
 			{
 				b.updatePosition(t);
-				//only draw held balls now, b/c they should appear behind the players. Non-held balls will be drawn later, in front of the players
-				if(b.isHeld())
-				{
-					b.draw(ctx);
-				}
 			}
 			
-			//loop through players and update their positions and draw them
+			//loop through players and update their positions and draw them. Players also draw balls they hold
 			for(Player p : players)
 			{
 				p.updatePosition(t);

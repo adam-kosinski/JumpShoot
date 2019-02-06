@@ -136,9 +136,8 @@ public class Player
 				{
 					if(b.isDangerous() || b.isHeld()){continue;} //can't pick up dangerous or held balls
 					
-					//if the center of this player is within the radius of the ball, we can pick it up
-					double dist = Math.hypot(x+(width/2) - b.getX(), y+(height/2) - b.getY());
-					if(dist < b.getRadius())
+					//if the center of the ball is within the player, we can pick it up
+					if(b.getX() > x && b.getX() < x+width && b.getY() > y && b.getY() < y+height)
 					{
 						myBall = Optional.of(b);
 						b.pickup(this);
@@ -185,8 +184,11 @@ public class Player
 		if(myBall.isPresent())
 		{
 			ctx.setStroke(Color.GRAY);
-			ctx.setLineDashes((width+height)/10);
-			ctx.strokeLine(x+width/2, y, x+width/2 + width*Math.cos(shootAngle), y + height*Math.sin(shootAngle));
+			ctx.setLineDashes(width/5);
+			ctx.strokeLine(x+width/2, y, x+width/2 + width*Math.cos(shootAngle), y + width*Math.sin(shootAngle));
+			
+			//draw the ball
+			myBall.get().draw(ctx);
 		}
 		
 		//draw player
