@@ -185,7 +185,7 @@ public class Player
 		if(myBall.isPresent())
 		{
 			ctx.setStroke(Color.GRAY);
-			ctx.setLineDashes(width/5);
+			ctx.setLineDashes((width+height)/10);
 			ctx.strokeLine(x+width/2, y, x+width/2 + width*Math.cos(shootAngle), y + height*Math.sin(shootAngle));
 		}
 		
