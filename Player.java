@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.input.KeyCode;
+import javafx.scene.image.Image;
 
 public class Player
 {
@@ -30,6 +31,12 @@ public class Player
 	private double width;
 	private double height;
 	private Color color;
+	private Image rightChungus;
+	private Image leftChungus;
+	
+	private int health;
+	private double t_hit_player; //time when ball hit player; players are invincible for a certain timeout after being hit
+	private double invincible_timeout; //this is that timeout, in sec
 	
 	private KeyCode jumpKey;
 	private KeyCode leftKey;
@@ -51,7 +58,7 @@ public class Player
 	private ArrayList<Wall> walls; //will be equal to the main array of these
 	private ArrayList<Ball> balls;
 	
-	public Player(double x,double y,double width,double height, Color color, double ay)
+	public Player(double x,double y,double width, Color color, double ay)
 	{
 		this.x = x;
 		this.xi = x;
@@ -73,8 +80,14 @@ public class Player
 		this.y_collision = 0;
 		
 		this.width = width;
-		this.height = height;
+		this.height = .75*1.75*width;
 		this.color = color;
+		this.rightChungus = new Image("rightChungus.png");
+		this.leftChungus = new Image("leftChungus.png");
+		
+		this.health = 5;
+		this.t_hit_player = 0;
+		this.invincible_timeout = 0.5;
 		
 		this.direction = "right"; //make sure this is consistent with the initialized shootAngle
 		
@@ -180,20 +193,24 @@ public class Player
 	
 	public void draw(GraphicsContext ctx)
 	{
+		//draw player
+		ctx.setFill(color);
+		//ctx.fillRect(x,y,width,height);
+		Image chungus = direction=="left"? leftChungus : rightChungus;
+		ctx.drawImage(chungus, x, y-.22*1.75*width, width, 1.75*width); //aspect ratio width:height is 1:1.75
+		
 		//draw trajectory direction
 		if(myBall.isPresent())
 		{
 			ctx.setStroke(Color.GRAY);
 			ctx.setLineDashes(width/5);
-			ctx.strokeLine(x+width/2, y, x+width/2 + width*Math.cos(shootAngle), y + width*Math.sin(shootAngle));
+			double ball_x = myBall.get().getX();
+			double ball_y = myBall.get().getY();
+			ctx.strokeLine(ball_x, ball_y, ball_x + width*Math.cos(shootAngle), ball_y + width*Math.sin(shootAngle));
 			
 			//draw the ball
 			myBall.get().draw(ctx);
 		}
-		
-		//draw player
-		ctx.setFill(color);
-		ctx.fillRect(x,y,width,height);
 	}
 	
 	//function to update player's position
@@ -287,6 +304,20 @@ public class Player
 		} //finish looping through walls
 		if(!foundXCollision) {x_collision = 0;}
 		if(!foundYCollision) {y_collision = 0;}
+		
+		//check if a ball hit this player
+		for(Ball b : balls)
+		{
+			if(!b.isDangerous()){continue;}
+			
+			//if the center of the ball is within the player, and time since last hit is bigger than timeout, it hit us
+			if(b.getX() > x && b.getX() < x+width && b.getY() > y && b.getY() < y+height && time-t_hit_player > invincible_timeout)
+			{
+				health--;
+				t_hit_player = time;
+				System.out.println("hit player!");
+			}
+		}
 	}
 	
 	public void setXVelocity(double vx)//time is the current time in seconds, from when the main animation timer started

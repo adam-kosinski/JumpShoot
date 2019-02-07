@@ -46,7 +46,7 @@ public class Ball
 		this.vx = 0;
 		this.vy = 0;
 		this.ay = ay;
-		this.x_friction_scalar = 0.6;
+		this.x_friction_scalar = 0.8;
 		
 		this.time = 0;
 		this.ti_x = 0;
@@ -54,7 +54,7 @@ public class Ball
 		this.t_y_collision = 0;
 		this.t_release = 0;
 		
-		this.safe_timeout = 0.1;
+		this.safe_timeout = 0.2;
 		
 		this.x_collision = 0;
 		this.y_collision = 0;
@@ -84,7 +84,7 @@ public class Ball
 		if(holder.isPresent())
 		{
 			x = holder.get().getX() + (holder.get().getWidth() / 2);
-			y = holder.get().getY();
+			y = holder.get().getY() + (holder.get().getHeight() * 0.65);
 			setXVelocity(0);
 			setYVelocity(0);
 			return;

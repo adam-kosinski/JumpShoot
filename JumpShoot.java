@@ -47,11 +47,11 @@ public class JumpShoot extends Application
 		primary.show();
 		
 		//create objects
-		players.add(new Player(100,200,25,45,Color.RED,ay));
+		players.add(new Player(100,200,50,Color.RED,ay));
 		players.get(0).bindKeys(KeyCode.R, KeyCode.D, KeyCode.F, KeyCode.G, KeyCode.DIGIT1, KeyCode.DIGIT2, KeyCode.DIGIT3);
 		players.get(0).giveObjects(walls,balls);
 		
-		players.add(new Player(200,200,25,25,Color.GREEN,ay));
+		players.add(new Player(200,200,50,Color.GREEN,ay));
 		players.get(1).bindKeys(KeyCode.UP, KeyCode.LEFT, KeyCode.DOWN, KeyCode.RIGHT, KeyCode.M, KeyCode.COMMA, KeyCode.PERIOD);
 		players.get(1).giveObjects(walls,balls);
 		
@@ -63,6 +63,8 @@ public class JumpShoot extends Application
 		walls.add(new Wall(600,0,10,700,Color.BROWN, false)); //right wall
 		
 		balls.add(new Ball(50, 100, 10, Color.BLUE,ay));
+		balls.add(new Ball(150, 100, 10, Color.BLUE,ay));
+		balls.add(new Ball(250, 100, 10, Color.BLUE,ay));
 		
 		for(Player p : players)
 		{
