@@ -3,11 +3,11 @@ import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 
 //animation stuff
@@ -24,9 +24,11 @@ public class JumpShoot extends Application
 	//references to GUI
 	private Canvas canvas;
 	private GraphicsContext ctx;
+	private Canvas status_canvas;
 	
 	//misc
 	private double ay = 375; //gravitational acceleration, px/s^2
+	private double nLives = 5; //number of lives each player gets
 	
 	@Override
 	public void init()
@@ -41,17 +43,21 @@ public class JumpShoot extends Application
 		canvas = new Canvas(600,600);
 		ctx = canvas.getGraphicsContext2D();
 		
-		VBox vbox = new VBox(canvas);
-		Scene s = new Scene(vbox,600,600); //sceneWidth and sceneHeight are state variables of this class
+		status_canvas = new Canvas(600,50);
+		
+		BorderPane bp = new BorderPane();
+		bp.setCenter(canvas);
+		bp.setBottom(status_canvas);
+		Scene s = new Scene(bp); //sceneWidth and sceneHeight are state variables of this class
 		primary.setScene(s);
 		primary.show();
 		
 		//create objects
-		players.add(new Player(100,200,50,Color.RED,ay));
+		players.add(new Player(100,200,50,new Image("bowlinghat.png"),ay));
 		players.get(0).bindKeys(KeyCode.R, KeyCode.D, KeyCode.F, KeyCode.G, KeyCode.DIGIT1, KeyCode.DIGIT2, KeyCode.DIGIT3);
 		players.get(0).giveObjects(walls,balls);
 		
-		players.add(new Player(200,200,50,Color.GREEN,ay));
+		players.add(new Player(200,200,50,new Image("cowboyhat.png"),ay));
 		players.get(1).bindKeys(KeyCode.UP, KeyCode.LEFT, KeyCode.DOWN, KeyCode.RIGHT, KeyCode.M, KeyCode.COMMA, KeyCode.PERIOD);
 		players.get(1).giveObjects(walls,balls);
 		
@@ -101,6 +107,38 @@ public class JumpShoot extends Application
 	@Override
 	public void stop()
 	{}
+	
+	public void updateStatusBar()
+	{
+		GraphicsContext s_ctx = status_canvas.getGraphicsContext2D();
+		s_ctx.clearRect(0,0,status_canvas.getWidth(),status_canvas.getHeight());
+		
+		//draw background
+		s_ctx.setFill(Color.BLACK);
+		s_ctx.fillRect(0,0,status_canvas.getWidth(),8);
+		s_ctx.setFill(Color.ORANGE);
+		s_ctx.fillRect(0,8,status_canvas.getWidth(),status_canvas.getHeight()-8);
+		
+		//loop through players and display their info
+		for(int i=0; i < players.size(); i++)
+		{
+			//reference point for drawing this player
+			double base_x = 5 + i*(55 + nLives*25 + 20); //left padding plus hat plus hearts plus padding between players
+			
+			//draw the hat representing the player
+			Image hat = players.get(i).getHat();
+			double hat_width = 50;
+			double hat_height = hat.getHeight() * (hat_width/hat.getWidth());
+			s_ctx.drawImage(hat,base_x,15,hat_width,hat_height);
+			
+			//draw the player's lives - each heart will be 20 x 20 px, with 5px gaps
+			Image heart = new Image("heart.png");
+			for(int h=0; h < players.get(i).getHealth(); h++)
+			{
+				s_ctx.drawImage(heart,base_x+hat_width+5+h*25,20,20,20);
+			}
+		}
+	}
 	
 	public class GameAnimation extends AnimationTimer
 	{
@@ -156,6 +194,8 @@ public class JumpShoot extends Application
 				}
 			}
 			
+			//update status bar
+			updateStatusBar();
 		}
 	}
 }

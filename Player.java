@@ -28,11 +28,12 @@ public class Player
 	private int x_collision; // -1 means wall to left, 0 means no collision, 1 means wall to right
 	private int y_collision; // -1 means wall above, 0 means no collision, 1 means wall below
 	
-	private double width;
-	private double height;
-	private Color color;
+	private Image hat;
 	private Image rightChungus;
 	private Image leftChungus;
+	private double width; //width of hitbox and of chungus image
+	private double chungus_height; //height of chungus image
+	private double height; //height of hitbox
 	
 	private int health;
 	private double t_hit_player; //time when ball hit player; players are invincible for a certain timeout after being hit
@@ -58,7 +59,7 @@ public class Player
 	private ArrayList<Wall> walls; //will be equal to the main array of these
 	private ArrayList<Ball> balls;
 	
-	public Player(double x,double y,double width, Color color, double ay)
+	public Player(double x,double y,double width, Image hat, double ay)
 	{
 		this.x = x;
 		this.xi = x;
@@ -79,11 +80,12 @@ public class Player
 		this.x_collision = 0;
 		this.y_collision = 0;
 		
-		this.width = width;
-		this.height = .75*1.75*width;
-		this.color = color;
+		this.hat = hat;
 		this.rightChungus = new Image("rightChungus.png");
 		this.leftChungus = new Image("leftChungus.png");
+		this.width = width;
+		this.chungus_height = (width/rightChungus.getWidth()) * rightChungus.getHeight();
+		this.height = .75 * chungus_height; // 0.75 of the image height
 		
 		this.health = 5;
 		this.t_hit_player = 0;
@@ -194,10 +196,12 @@ public class Player
 	public void draw(GraphicsContext ctx)
 	{
 		//draw player
-		ctx.setFill(color);
-		//ctx.fillRect(x,y,width,height);
 		Image chungus = direction=="left"? leftChungus : rightChungus;
-		ctx.drawImage(chungus, x, y-.22*1.75*width, width, 1.75*width); //aspect ratio width:height is 1:1.75
+		ctx.drawImage(chungus, x, y-.22*chungus_height, width, chungus_height); //y-.25*chungus_height would place the image perfectly on the platform, but I want to draw it a bit down
+		double hat_width = 0.45*width;
+		double hat_height = (hat_width/hat.getWidth()) * hat.getHeight();
+		double hat_x = x + (direction=="right"? (width-hat_width)*0.6 : (width-hat_width)*0.4);
+		ctx.drawImage(hat, hat_x, y-0.2*hat_height, hat_width, hat_height);
 		
 		//draw trajectory direction
 		if(myBall.isPresent())
@@ -372,5 +376,13 @@ public class Player
 	public double getHeight()
 	{
 		return height;
+	}
+	public double getHealth()
+	{
+		return health;
+	}
+	public Image getHat()
+	{
+		return hat;
 	}
 }
