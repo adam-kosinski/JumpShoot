@@ -85,6 +85,8 @@ public class Ball
 		{
 			x = holder.get().getX() + (holder.get().getWidth() / 2);
 			y = holder.get().getY() + (holder.get().getHeight() * 0.65);
+			x_collision = 0;
+			y_collision = 0; //if this is not set, it can effect calculations involving friction and cause dud shots where the ball goes straight up
 			setXVelocity(0);
 			setYVelocity(0);
 			return;
@@ -117,6 +119,10 @@ public class Ball
 		if(x_collision == 0)
 		{
 			x = xi + vx*t_x;
+			if(thrown == true && Math.abs(vx) < 1)
+			{
+				System.out.println("DUD!");
+			}
 		}
 		
 		if(y_collision != 1)
@@ -237,6 +243,11 @@ public class Ball
 		holder = Optional.empty();
 		thrown = true;
 		t_release = time;
+	}
+	
+	public void setNotDangerous() //called if a ball hits a player, to avoid multiple life-loss
+	{
+		thrown = false;
 	}
 	
 	public double getX()

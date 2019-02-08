@@ -36,7 +36,7 @@ public class Player
 	private double height; //height of hitbox
 	
 	private int health;
-	private double t_hit_player; //time when ball hit player; players are invincible for a certain timeout after being hit
+	private double t_threw_ball; //time when the player last threw a ball; players are invincible for a certain timeout after throwing a ball
 	private double invincible_timeout; //this is that timeout, in sec
 	
 	private KeyCode jumpKey;
@@ -88,7 +88,7 @@ public class Player
 		this.height = .75 * chungus_height; // 0.75 of the image height
 		
 		this.health = 5;
-		this.t_hit_player = 0;
+		this.t_threw_ball = 0;
 		this.invincible_timeout = 0.5;
 		
 		this.direction = "right"; //make sure this is consistent with the initialized shootAngle
@@ -315,11 +315,10 @@ public class Player
 			if(!b.isDangerous()){continue;}
 			
 			//if the center of the ball is within the player, and time since last hit is bigger than timeout, it hit us
-			if(b.getX() > x && b.getX() < x+width && b.getY() > y && b.getY() < y+height && time-t_hit_player > invincible_timeout)
+			if(b.getX() > x && b.getX() < x+width && b.getY() > y && b.getY() < y+height && time-t_threw_ball > invincible_timeout)
 			{
 				health--;
-				t_hit_player = time;
-				System.out.println("hit player!");
+				b.setNotDangerous();
 			}
 		}
 	}
@@ -357,6 +356,8 @@ public class Player
 		b.release();
 		b.setXVelocity(shootVelocity * Math.cos(shootAngle));
 		b.setYVelocity(shootVelocity * Math.sin(shootAngle));
+		
+		t_threw_ball = time;
 		
 		myBall = Optional.empty();
 	}
