@@ -27,6 +27,7 @@ public class Player
 	
 	private int x_collision; // -1 means wall to left, 0 means no collision, 1 means wall to right
 	private int y_collision; // -1 means wall above, 0 means no collision, 1 means wall below
+	private boolean border_y_collision; //set to true if the y_collision is with a border wall
 	
 	private Image hat;
 	private Image rightChungus;
@@ -46,7 +47,7 @@ public class Player
 	private KeyCode rotateLeftKey; //for launch angle changing
 	private KeyCode ballKey;
 	private KeyCode rotateRightKey;
-	private KeyCode prevKey;
+	private boolean downKeyProcessed; //keeps track if we processed the first down key press, used so that we only process the first one
 	
 	private String direction; //"left" or "right"; direction the player is facing
 	
@@ -79,6 +80,7 @@ public class Player
 		
 		this.x_collision = 0;
 		this.y_collision = 0;
+		this.border_y_collision = false;
 		
 		this.hat = hat;
 		this.rightChungus = new Image("rightChungus.png");
@@ -110,7 +112,7 @@ public class Player
 		this.rotateLeftKey = rotateLeftKey;
 		this.ballKey = ballKey;
 		this.rotateRightKey = rotateRightKey;
-		this.prevKey = KeyCode.UNDEFINED;
+		this.downKeyProcessed = false;
 	}
 	
 	public void giveObjects(ArrayList<Wall> walls, ArrayList<Ball> balls)
@@ -137,9 +139,18 @@ public class Player
 		}
 		else if(key == downKey)
 		{
-			if(prevKey != downKey) //check previous key so we don't get massive change in velocity due to rapid-fire keypress events from holding down the key
+			if(!downKeyProcessed) //only process down key once. This gets set to false when we release the down key
 			{
-				setYVelocity(vy + ay*(time-ti_y) + vy_boost);
+				downKeyProcessed = true;
+				if(y_collision == 1 && !border_y_collision) //then drop through the platform
+				{
+					y_collision = 0;
+					y += 1;
+				}
+				else //accelerate downwards
+				{
+					setYVelocity(vy + ay*(time-ti_y) + vy_boost);
+				}
 			}
 		}
 		else if(key == ballKey)
@@ -181,8 +192,6 @@ public class Player
 				shootAngle = -shootAngleArray[shootAngleIndex];
 			}
 		}
-		
-		prevKey = key;
 	}
 	
 	public void handleKeyRelease(KeyCode key)
@@ -190,6 +199,10 @@ public class Player
 		if(key == leftKey || key == rightKey)
 		{
 			setXVelocity(0);
+		}
+		else if(key == downKey)
+		{
+			downKeyProcessed = false;
 		}
 	}
 	
@@ -231,6 +244,11 @@ public class Player
 		{
 			y_collision = 0;
 		}
+		//if no y_collision, no border_y_collision
+		if(y_collision == 0)
+		{
+			border_y_collision = false;
+		}
 		
 		//define t to be time since most recent velocity reset
 		double t_x = time - ti_x;
@@ -264,10 +282,11 @@ public class Player
 				
 				y = w.getY() - height;
 				y_collision = 1;
+				if(w.isBorderWall()){border_y_collision = true;}
 				setYVelocity(0);
 			}
-			//all other collision tests are dependent on if this is a top-collision-only wall
-			if(!w.isTopCollisionOnly())
+			//all other collision tests are dependent on if this is a border wall
+			if(w.isBorderWall())
 			{
 				//test collision above
 				if( (x+width > w.getX() && x < w.getX()+w.getWidth()) && (prev_y >= w.getY()+w.getHeight() && y <= w.getY()+w.getHeight()) ) //if in right x-range and collide vertically

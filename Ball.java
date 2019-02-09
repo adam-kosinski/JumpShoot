@@ -150,8 +150,8 @@ public class Ball
 				y_collision = 1;
 				setYVelocity(0);
 			}
-			//all other collision tests are dependent on if this is a top-collision-only wall
-			if(!w.isTopCollisionOnly())
+			//all other collision tests are dependent on if this is a border wall
+			if(w.isBorderWall())
 			{
 				//test collision above
 				if( (x+r > w.getX() && x-r < w.getX()+w.getWidth()) && (prev_y-r >= w.getY()+w.getHeight() && y-r <= w.getY()+w.getHeight()) ) //if in right x-range and collide vertically

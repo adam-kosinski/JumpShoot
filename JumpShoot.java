@@ -61,12 +61,12 @@ public class JumpShoot extends Application
 		players.get(1).bindKeys(KeyCode.UP, KeyCode.LEFT, KeyCode.DOWN, KeyCode.RIGHT, KeyCode.M, KeyCode.COMMA, KeyCode.PERIOD);
 		players.get(1).giveObjects(walls,balls);
 		
-		walls.add(new Wall(20,450,200,15,Color.BROWN, true));
-		walls.add(new Wall(300,500,200,15,Color.BROWN, true));
+		walls.add(new Wall(20,450,200,15,Color.BROWN));
+		walls.add(new Wall(300,500,200,15,Color.BROWN));
 		
-		walls.add(new Wall(0,570,600,30,Color.BROWN, false)); //floor
-		walls.add(new Wall(-10,0,10,700,Color.BROWN, false)); //left wall
-		walls.add(new Wall(600,0,10,700,Color.BROWN, false)); //right wall
+		walls.add(new Wall(0,570,600,30,Color.BROWN, true)); //floor
+		walls.add(new Wall(-10,0,10,700,Color.BROWN, true)); //left wall
+		walls.add(new Wall(600,0,10,700,Color.BROWN, true)); //right wall
 		
 		balls.add(new Ball(50, 100, 10, Color.BLUE,ay));
 		balls.add(new Ball(150, 100, 10, Color.BLUE,ay));

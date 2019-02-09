@@ -9,18 +9,24 @@ public class Wall
 	private double height;
 	private Color color;
 	
-	private boolean top_collision_only; //if true, only stuff falling from above will interact with the wall
+	private boolean border_wall; //if true, all sides of the wall will block objects, and it won't be possible to press down and fall through the wall
 	
-	public Wall(double x, double y, double width, double height, Color color, boolean top_collision_only)
+	//constructors
+	public Wall(double x, double y, double width, double height, Color color, boolean border_wall)
 	{
 		this.x = x; //(x,y) of top left corner
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		this.color = color;
-		this.top_collision_only = top_collision_only;
+		this.border_wall = border_wall;
+	}
+	public Wall(double x, double y, double width, double height, Color color) //if border_wall not included, assume false
+	{
+		this(x,y,width,height,color,false);
 	}
 	
+	//methods
 	public void draw(GraphicsContext ctx)
 	{
 		ctx.setFill(color);
@@ -43,8 +49,8 @@ public class Wall
 	{
 		return height;
 	}
-	public boolean isTopCollisionOnly()
+	public boolean isBorderWall()
 	{
-		return top_collision_only;
+		return border_wall;
 	}
 }
