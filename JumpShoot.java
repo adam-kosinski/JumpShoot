@@ -25,9 +25,11 @@ public class JumpShoot extends Application
 	private Canvas canvas;
 	private GraphicsContext ctx;
 	private Canvas status_canvas;
+	private double field_width = 800;
+	private double field_height = 600;
 	
 	//misc
-	private double ay = 375; //gravitational acceleration, px/s^2
+	private double ay = 500; //gravitational acceleration, px/s^2
 	private double nLives = 5; //number of lives each player gets
 	
 	@Override
@@ -40,10 +42,12 @@ public class JumpShoot extends Application
 	{
 		//load GUI
 		
-		canvas = new Canvas(600,600);
+		
+		
+		canvas = new Canvas(field_width,field_height);
 		ctx = canvas.getGraphicsContext2D();
 		
-		status_canvas = new Canvas(600,50);
+		status_canvas = new Canvas(field_width,50);
 		
 		BorderPane bp = new BorderPane();
 		bp.setCenter(canvas);
@@ -61,12 +65,17 @@ public class JumpShoot extends Application
 		players.get(1).bindKeys(KeyCode.UP, KeyCode.LEFT, KeyCode.DOWN, KeyCode.RIGHT, KeyCode.M, KeyCode.COMMA, KeyCode.PERIOD);
 		players.get(1).giveObjects(walls,balls);
 		
-		walls.add(new Wall(20,450,200,15,Color.BROWN));
-		walls.add(new Wall(300,500,200,15,Color.BROWN));
+		//platforms
+		walls.add(new Wall(20,450,100,15,Color.BROWN));
+		walls.add(new Wall(300,500,150,15,Color.BROWN));
+		walls.add(new Wall(200,200,150,15,Color.BROWN));
+		walls.add(new Wall(100,300,150,15,Color.BROWN));
+		walls.add(new Wall(400,350,150,15,Color.BROWN));
+		walls.add(new Wall(500,250,250,15,Color.BROWN));
 		
-		walls.add(new Wall(0,570,600,30,Color.BROWN, true)); //floor
-		walls.add(new Wall(-10,0,10,700,Color.BROWN, true)); //left wall
-		walls.add(new Wall(600,0,10,700,Color.BROWN, true)); //right wall
+		walls.add(new Wall(0,field_height-30,field_width,30,Color.BROWN, true)); //floor
+		walls.add(new Wall(-10,-500,10,field_height+500,Color.BROWN, true)); //left wall
+		walls.add(new Wall(field_width,-500,10,field_height+500,Color.BROWN, true)); //right wall
 		
 		balls.add(new Ball(50, 100, 10, Color.BLUE,ay));
 		balls.add(new Ball(150, 100, 10, Color.BLUE,ay));

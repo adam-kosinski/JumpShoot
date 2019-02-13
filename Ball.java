@@ -17,6 +17,7 @@ public class Ball
 	private double vy;
 	private double ay;
 	private double x_friction_scalar; //must be < 1. During collisions, multiply vx by this^t (t in seconds) to simulate friction
+	private double x_bounce_scalar; //0-1, 0 means no bounce, 1 means perfectly elastic collision
 	
 	private double time; //time of most recent updatePosition call
 	private double ti_x; //time of most recent x velocity reset
@@ -47,6 +48,7 @@ public class Ball
 		this.vy = 0;
 		this.ay = ay;
 		this.x_friction_scalar = 0.8;
+		this.x_bounce_scalar = 0.5;
 		
 		this.time = 0;
 		this.ti_x = 0;
@@ -119,10 +121,6 @@ public class Ball
 		if(x_collision == 0)
 		{
 			x = xi + vx*t_x;
-			if(thrown == true && Math.abs(vx) < 1)
-			{
-				System.out.println("DUD!");
-			}
 		}
 		
 		if(y_collision != 1)
@@ -175,9 +173,7 @@ public class Ball
 					x = w.getX() - r;
 					x_collision = 1;
 					
-					//do set velocity stuff without changing the stored velocity
-					xi = x;
-					ti_x = time;
+					setXVelocity(-x_bounce_scalar * vx);
 				}
 				//test collision to left
 				if( (y+r > w.getY() && y-r < w.getY()+w.getHeight()) && (prev_x-r >= w.getX()+w.getWidth() && x-r <= w.getX()+w.getWidth()) ) //if in right y-range and collide horizontally
@@ -187,15 +183,11 @@ public class Ball
 					x = w.getX()+w.getWidth() + r;
 					x_collision = -1;
 					
-					//do set velocity stuff without changing the stored velocity
-					xi = x;
-					ti_x = time;
+					setXVelocity(vx * -x_bounce_scalar);
 				}
 			}			
 		} //finish looping through walls
 		if(!foundXCollision) {x_collision = 0;}
-		else {setXVelocity(0);} //stop horizontal movement if we crashed into something
-		
 		if(!foundYCollision) {y_collision = 0;}
 		
 		//apply friction for next update call if there's a y-collision
@@ -216,7 +208,7 @@ public class Ball
 	{
 		if(x_collision == 1 && vx > 0){return;}
 		if(x_collision == -1 && vx < 0){return;}
-		
+				
 		xi = x;		
 		this.vx = vx;
 		

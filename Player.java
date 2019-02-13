@@ -4,6 +4,8 @@ import java.util.Optional;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.effect.Light;
+import javafx.scene.effect.Lighting;
 import javafx.scene.input.KeyCode;
 import javafx.scene.image.Image;
 
@@ -24,6 +26,7 @@ public class Player
 	private double time; //time of most recent updatePosition call
 	private double ti_x; //time of most recent x velocity reset
 	private double ti_y; //time of most recent y velocity reset
+	private double t_hit; //time the player most recently got hit, used for making them red when hit
 	
 	private int x_collision; // -1 means wall to left, 0 means no collision, 1 means wall to right
 	private int y_collision; // -1 means wall above, 0 means no collision, 1 means wall below
@@ -39,6 +42,7 @@ public class Player
 	private int health;
 	private double t_threw_ball; //time when the player last threw a ball; players are invincible for a certain timeout after throwing a ball
 	private double invincible_timeout; //this is that timeout, in sec
+	private double red_color_timeout; //how long to make the player red after getting hit, in sec
 	
 	private KeyCode jumpKey;
 	private KeyCode leftKey;
@@ -71,12 +75,13 @@ public class Player
 		this.ay = ay;
 		
 		this.vy_boost = 250;
-		this.jump_speed = 250;
-		this.horiz_speed = 125;
+		this.jump_speed = 450;
+		this.horiz_speed = 250;
 		
 		this.time = 0;
 		this.ti_x = 0;
 		this.ti_y = 0;
+		this.t_hit = -1000; //since a player will be red if time_now - time_hit < some number, make sure they're not red to start out by making this v. negative
 		
 		this.x_collision = 0;
 		this.y_collision = 0;
@@ -92,6 +97,7 @@ public class Player
 		this.health = 5;
 		this.t_threw_ball = 0;
 		this.invincible_timeout = 0.5;
+		this.red_color_timeout = 0.5;
 		
 		this.direction = "right"; //make sure this is consistent with the initialized shootAngle
 		
@@ -100,7 +106,7 @@ public class Player
 		this.shootAngleArray = new double[]{0.05*Math.PI,0.25*Math.PI,0.75*Math.PI,0.95*Math.PI};
 		this.shootAngleIndex = 2;
 		this.shootAngle = -shootAngleArray[shootAngleIndex];
-		this.shootVelocity = 300;
+		this.shootVelocity = 500;
 	}
 	
 	public void bindKeys(KeyCode jumpKey, KeyCode leftKey, KeyCode downKey, KeyCode rightKey, KeyCode rotateLeftKey, KeyCode ballKey, KeyCode rotateRightKey)
@@ -208,6 +214,20 @@ public class Player
 	
 	public void draw(GraphicsContext ctx)
 	{
+		//make player red if got hit
+		if(time - t_hit < red_color_timeout)
+		{
+			//hooray for copy-pasted code!
+			Lighting lighting = new Lighting();
+			lighting.setDiffuseConstant(1.0);
+			lighting.setSpecularConstant(0.0);
+			lighting.setSpecularExponent(0.0);
+			lighting.setSurfaceScale(0.0);
+			lighting.setLight(new Light.Distant(45, 45, Color.ORANGERED));
+			
+			ctx.setEffect(lighting);
+		}
+		
 		//draw player
 		Image chungus = direction=="left"? leftChungus : rightChungus;
 		ctx.drawImage(chungus, x, y-.22*chungus_height, width, chungus_height); //y-.25*chungus_height would place the image perfectly on the platform, but I want to draw it a bit down
@@ -215,6 +235,9 @@ public class Player
 		double hat_height = (hat_width/hat.getWidth()) * hat.getHeight();
 		double hat_x = x + (direction=="right"? (width-hat_width)*0.6 : (width-hat_width)*0.4);
 		ctx.drawImage(hat, hat_x, y-0.2*hat_height, hat_width, hat_height);
+		
+		//nothing else should be drawn red, reset the red effect
+		ctx.setEffect(null);
 		
 		//draw trajectory direction
 		if(myBall.isPresent())
@@ -338,6 +361,7 @@ public class Player
 			{
 				health--;
 				b.setNotDangerous();
+				t_hit = time;
 			}
 		}
 	}
@@ -347,7 +371,7 @@ public class Player
 		if(x_collision == 1 && vx > 0){return;}
 		if(x_collision == -1 && vx < 0){return;}
 		
-		xi = x;		
+		xi = x;
 		this.vx = vx;
 		
 		ti_x = time;
