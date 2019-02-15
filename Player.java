@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Optional;
+import java.io.File;
 
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
@@ -8,6 +9,9 @@ import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
 import javafx.scene.input.KeyCode;
 import javafx.scene.image.Image;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.AudioClip;
 
 public class Player
 {
@@ -362,6 +366,10 @@ public class Player
 				health--;
 				b.setNotDangerous();
 				t_hit = time;
+				
+				//play chungus chuckle sound
+				AudioClip sound = new AudioClip(new File("chuckle.mp3").toURI().toString());
+				sound.play();
 			}
 		}
 	}

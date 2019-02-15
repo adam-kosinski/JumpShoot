@@ -29,7 +29,7 @@ public class JumpShoot extends Application
 	private double field_height = 600;
 	
 	//misc
-	private double ay = 500; //gravitational acceleration, px/s^2
+	private double ay = 550; //gravitational acceleration, px/s^2
 	private double nLives = 5; //number of lives each player gets
 	
 	@Override
